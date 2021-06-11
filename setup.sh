@@ -28,7 +28,10 @@
 #  THE POSSIBILITY OF SUCH DAMAGE.
 
 BASE_DIR=$(pwd)
-WORK_DIR=../Swordfish
+WORK_DIR=../OFMF_POC
+
+MOCKUP_DIR=../mockups
+
 
 API_PORT=5000
 SETUP_ONLY=
@@ -113,6 +116,13 @@ echo "Getting Redfish emulator base files..."
 git clone --depth 1 https://github.com/DMTF/Redfish-Interface-Emulator \
     $WORK_DIR
 
+echo "Getting mockups repository: '$MOCKUP_DIR'..."
+rm -fr $MOCKUP_DIR
+mkdir $MOCKUP_DIR
+
+git clone --depth 1 https://github.com/OFMFWG/mockups \
+    $MOCKUP_DIR
+
 # Set up our virtual environment
 echo "Setting up emulator Python virtualenv and requirements..."
 cd $WORK_DIR
@@ -120,13 +130,17 @@ virtualenv --python=python3 venv
 venv/bin/pip install -q -r requirements.txt
 
 # Remove Redfish static / starting mockups
-rm -r $WORK_DIR/api_emulator/redfish/static
+rm -rf $WORK_DIR/api_emulator/redfish/static
 
 # Copy over the Swordfish bits
 echo "Applying Swordfish additions..."
 cp -r -f $BASE_DIR/api_emulator $WORK_DIR/
-cp -r -f $BASE_DIR/Resources $WORK_DIR/
 cp -r -f $BASE_DIR/emulator-config.json $WORK_DIR/
+
+echo "Add mockups from OFMF mockup repository..."
+rm -rf $WORK_DIR/Resources
+cp -r -f $MOCKUP_DIR/SC21-PoC/ $WORK_DIR/Resources
+cp -r -f $MOCKUP_DIR/SC21-PoC/ $WORK_DIR/api_emulator/redfish/static
 
 if [ "$SETUP_ONLY" == "true" ]; then
     echo ""
