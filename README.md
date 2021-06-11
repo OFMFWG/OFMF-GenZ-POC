@@ -47,11 +47,11 @@ The Redfish-Interface-Emulator must be installed first, and then the OFMF-GenZ-P
 
 ##### (1) Create a folder for the emulator.
 
-This folder is where the Redfish Interface Emulator files will be combined with the OFMF-GenZ-POC files to install the Swordfish emulator. As an example in these instructions, this folder is named **OFMF_POC**.
+This folder is where the Redfish Interface Emulator files will be combined with the OFMF-GenZ-POC files to install the emulator. As an example in these instructions, this folder is named **OFMF_POC**.
 
 ##### (2) Copy the Redfish Interface Emulator files into the emulator folder.
 
-Using the file explorer, go to the **Redfish-Interface-Emulator** folder, select and copy all the files using ```Control-A``` and ```Control-C```, then go to the **Swordfish** folder and paste all the files into it using ```Control-V```.
+Using the file explorer, go to the **Redfish-Interface-Emulator** folder, select and copy all the files using ```Control-A``` and ```Control-C```, then go to the **OFMF_POC** folder and paste all the files into it using ```Control-V```.
 
 ##### (3) Install the Python packages required by the emulator.
 
@@ -69,11 +69,11 @@ The Redfish Interface Emulator and its dependencies should now be installed in i
 
 ##### (4) Copy the OFMF-GenZ-POC files into the emulator folder, and allow some of the Redfish Interface Emulator files to be overwritten.
 
-Using the file explorer, go to the **OFMF-GenZ-POC** folder, select and copy all the files using ```Control-A``` and ```Control-C```, then go to the **Swordfish** folder and paste all the files into it using ```Control-V```.
+Using the file explorer, go to the **OFMF-GenZ-POC** folder, select and copy all the files using ```Control-A``` and ```Control-C```, then go to the **OFMF_POC** folder and paste all the files into it using ```Control-V```.
 
 Windows will indicate that some files in the destination have the same names. Select the Windows “Replace the files in the destination” option.
 
-The OFMF-GenZ-POC and its dependencies should now be installed in its default configuration in the **OFMF-GenZ-POC** folder.
+The OFMF-GenZ-POC and its dependencies should now be installed in its default configuration in the **OFMF_POC** folder.
 
 ##### (5) If desired, a simple test of the OFMF-GenZ-POC installation can now be done by running the emulator and accessing the Redfish service root using a browser.
 
