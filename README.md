@@ -29,6 +29,8 @@ The simplest method to install the POC is to run the setup.sh script.  This will
 - Add the POC mockups from the OFMFWG/mockups repository, and
 - Start the emulator
 
+----
+
 The following instructions may be used as an alternative to the setup.sh script. 
 ### Installing the OFMF-GenZ-POC on Windows
 
