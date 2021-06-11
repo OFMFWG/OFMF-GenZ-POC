@@ -130,7 +130,7 @@ virtualenv --python=python3 venv
 venv/bin/pip install -q -r requirements.txt
 
 # Remove Redfish static / starting mockups
-rm -r $WORK_DIR/api_emulator/redfish/static
+rm -rf $WORK_DIR/api_emulator/redfish/static
 
 # Copy over the Swordfish bits
 echo "Applying Swordfish additions..."
@@ -140,6 +140,7 @@ cp -r -f $BASE_DIR/emulator-config.json $WORK_DIR/
 echo "Add mockups from OFMF mockup repository..."
 rm -rf $WORK_DIR/Resources
 cp -r -f $MOCKUP_DIR/SC21-PoC/ $WORK_DIR/Resources
+cp -r -f $MOCKUP_DIR/SC21-PoC/ $WORK_DIR/api_emulator/redfish/static
 
 if [ "$SETUP_ONLY" == "true" ]; then
     echo ""
