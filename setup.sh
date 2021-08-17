@@ -113,7 +113,7 @@ mkdir $WORK_DIR
 
 # Get the Redfish base
 echo "Getting Redfish emulator base files..."
-git clone --depth 1 https://github.com/rahlvers/Redfish-Interface-Emulator \
+git clone --depth 1 https://github.com/DMTF/Redfish-Interface-Emulator \
     $WORK_DIR
 
 echo "Getting mockups repository: '$MOCKUP_DIR'..."
