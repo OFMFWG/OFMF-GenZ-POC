@@ -84,12 +84,12 @@ class MDChunksAPI(Resource):
             return resp
         try:
             global config
-            global AGENT
+
             wildcards = {'c_id':chassis, 'md_id': memory_domain, 'mc_id': md_chunks, 'rb': g.rest_base}
             config=get_MDChunks_instance(wildcards)
 
             # Send commands to Agent:
-            agentpath = create_path ("http://localhost:5050/redfish/v1/", self.chassis, chassis, self.memory_domains,  memory_domain, self.md_chunks, md_chunks)
+            agentpath = create_path (g.AGENT, self.chassis, chassis, self.memory_domains,  memory_domain, self.md_chunks, md_chunks)
             logging.info(agentpath)
             agentresponse = requests.post(agentpath, data = config )
             logging.info(agentresponse)

@@ -137,6 +137,7 @@ echo "Applying Swordfish additions..."
 cp -r -f $BASE_DIR/api_emulator $WORK_DIR/
 cp -r -f $BASE_DIR/emulator-config.json $WORK_DIR/
 cp -r -f $BASE_DIR/emulator.py $WORK_DIR/
+cp -r -f $BASE_DIR/g.py $WORK_DIR/
 
 echo "Add mockups from OFMF mockup repository..."
 rm -rf $WORK_DIR/Resources
