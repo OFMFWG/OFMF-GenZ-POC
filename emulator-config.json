@@ -4,5 +4,7 @@
   "TRAYS": [],
   "STATIC": "Disable",
   "SPEC": "Redfish",
-  "MOCKUPFOLDERS": ["Mockups"]
+  "MOCKUPFOLDERS": ["Mockups"],
+  "AGENTURI": "192.168.1.21",
+  "AGENTPORT": "5050"
 }

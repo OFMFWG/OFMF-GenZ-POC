@@ -34,6 +34,7 @@ import json, os
 import traceback
 import logging
 import shutil
+import requests
 
 import g
 import urllib3
@@ -83,12 +84,29 @@ class MDChunksAPI(Resource):
             return resp
         try:
             global config
+            global AGENT
             wildcards = {'c_id':chassis, 'md_id': memory_domain, 'mc_id': md_chunks, 'rb': g.rest_base}
             config=get_MDChunks_instance(wildcards)
-            config = create_and_patch_object (config, members, member_ids, path, collection_path)
 
-            # Create sub-collections:
-            resp = config, 200
+            # Send commands to Agent:
+            agentpath = create_path ("http://localhost:5050/redfish/v1/", self.chassis, chassis, self.memory_domains,  memory_domain, self.md_chunks, md_chunks)
+            logging.info(agentpath)
+            agentresponse = requests.post(agentpath, data = config )
+            logging.info(agentresponse)
+
+            if agentresponse == 200:
+                objectinfo =  requests.get(agentpath)
+
+                # Set odata.id and Id to properties for this instance:
+                config['@odata.id'] = create_path ("/redfish/v1/", self.chassis, chassis, self.memory_domains,  memory_domain, self.md_chunks, md_chunks)
+                config['Id'] = md_chunks
+
+                config = create_and_patch_object (config, members, member_ids, path, collection_path)
+                # Create sub-collections:
+                resp = config, 200
+            else:
+                resp = 404
+                return resp
 
         except Exception:
             traceback.print_exc()
@@ -126,7 +144,7 @@ class MDChunksCollectionAPI(Resource):
         self.md_chunks = PATHS['Chassis']['md_chunks']
 
     def get(self, chassis, memory_domain):
-        path = os.path.join(self.root, self.chassis, chassis, self.memory_domains, 'index.json')
+        path = os.path.join(self.root, self.chassis, chassis, self.memory_domains, memory_domain, self.md_chunks, 'index.json')
         return get_json_data (path)
 
     def verify(self, config):

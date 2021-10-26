@@ -44,7 +44,7 @@ from api_emulator.utils import update_collections_json, create_path, get_json_da
 from .constants import *
 from .templates.c_memory import get_ChassisMemory_instance
 
-members =[]
+members = []
 member_ids = []
 config = {}
 INTERNAL_ERROR = 500
@@ -74,7 +74,7 @@ class ChassisMemoryAPI(Resource):
 
         # Check if collection exists:
         if not os.path.exists(collection_path):
-            MemoryCollectionAPI.post (self, chassis)
+            ChassisMemoryCollectionAPI.post (self, chassis)
 
         if memory in members:
             resp = 404
