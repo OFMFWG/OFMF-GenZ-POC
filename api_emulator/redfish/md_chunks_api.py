@@ -34,13 +34,14 @@ import json, os
 import traceback
 import logging
 import shutil
+import requests
 
 import g
 import urllib3
 
 from flask import jsonify, request
 from flask_restful import Resource
-from api_emulator.utils import update_collections_json, create_path, get_json_data, create_and_patch_object, delete_object, patch_object, put_object, delete_collection, create_collection
+from api_emulator.utils import update_collections_json, create_path, get_json_data, create_and_patch_object, delete_object, patch_object, put_object, delete_collection, create_collection, create_agent_path, add_input_body_properties, create_and_patch_agent_object
 from .constants import *
 from .templates.md_chunks import get_MDChunks_instance
 
@@ -83,12 +84,38 @@ class MDChunksAPI(Resource):
             return resp
         try:
             global config
+
             wildcards = {'c_id':chassis, 'md_id': memory_domain, 'mc_id': md_chunks, 'rb': g.rest_base}
             config=get_MDChunks_instance(wildcards)
-            config = create_and_patch_object (config, members, member_ids, path, collection_path)
 
-            # Create sub-collections:
-            resp = config, 200
+            config = add_input_body_properties (config)
+
+            # Send commands to Agent:
+            agentpath = create_agent_path (g.AGENT, "/redfish/v1/", self.chassis, chassis, self.memory_domains, memory_domain, self.md_chunks, md_chunks)
+            logging.info(agentpath)
+            agentresponse = requests.post(agentpath, data = config )
+            logging.info(agentresponse)
+
+            if agentresponse.status_code == 200:
+                # Copy body of response into config:
+                config = {}
+                # If input body data, then update properties
+                if request.data:
+                    request_data = json.loads(request.data)
+                    # Update the keys of payload in json file.
+                    for key, value in request_data.items():
+                        config[key] = value
+
+                # Set odata.id and Id to properties for this instance:
+                config['@odata.id'] = create_agent_path ("/redfish/v1/", self.chassis, chassis, self.memory_domains,  memory_domain, self.md_chunks, md_chunks)
+                config['Id'] = md_chunks
+
+                config = create_and_patch_agent_object (config, members, member_ids, path, collection_path)
+                # Create sub-collections:
+                resp = config, 200
+            else:
+                resp = 404
+                return resp
 
         except Exception:
             traceback.print_exc()
@@ -126,7 +153,7 @@ class MDChunksCollectionAPI(Resource):
         self.md_chunks = PATHS['Chassis']['md_chunks']
 
     def get(self, chassis, memory_domain):
-        path = os.path.join(self.root, self.chassis, chassis, self.memory_domains, 'index.json')
+        path = os.path.join(self.root, self.chassis, chassis, self.memory_domains, memory_domain, self.md_chunks, 'index.json')
         return get_json_data (path)
 
     def verify(self, config):

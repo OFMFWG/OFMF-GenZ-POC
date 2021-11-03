@@ -69,6 +69,8 @@ SPEC = None
 MODE = None
 MOCKUPFOLDERS = None
 STATIC = None
+AGENTPORT = None
+AGENTURI = None
 
 CONFIG = 'emulator-config.json'
 
@@ -102,6 +104,20 @@ with open(CONFIG, 'r') as f:
         STATIC = config['STATIC']
     except:
         pass
+
+    try:
+        AGENTURI = config['AGENTURI']
+    except:
+        pass
+
+    try:
+        AGENTPORT = config['AGENTPORT']
+    except:
+        pass
+
+
+g.AGENT = 'http://' + AGENTURI + ':' + AGENTPORT
+
 
 if(MODE=='Cloud'):
     port = int(os.getenv("PORT"))
