@@ -31,6 +31,7 @@
 
 import json, os
 import shutil
+import requests
 
 import traceback
 import logging
@@ -39,7 +40,7 @@ import urllib3
 
 from flask import jsonify, request
 from flask_restful import Resource
-from api_emulator.utils import update_collections_json, create_path, get_json_data, create_and_patch_object, delete_object, patch_object, put_object, delete_collection, create_collection
+from api_emulator.utils import update_collections_json, create_path, get_json_data, create_and_patch_object, delete_object, patch_object, put_object, delete_collection, create_collection, create_agent_path, add_input_body_properties, create_and_patch_agent_object
 from .constants import *
 from .templates.connections import get_Connections_instance
 
@@ -82,8 +83,34 @@ class FabricsConnectionsAPI(Resource):
             global config
             wildcards = {'f_id':fabric, 'c_id': f_connection, 'rb': g.rest_base}
             config=get_Connections_instance(wildcards)
-            config = create_and_patch_object (config, members, member_ids, path, collection_path)
-            resp = config, 200
+            config = add_input_body_properties (config)
+
+            # Send commands to Agent:
+            agentpath = create_agent_path (g.AGENT, "/redfish/v1/", self.fabrics, fabric, self.f_connections, f_connection)
+            logging.info(agentpath)
+            agentresponse = requests.post(agentpath, data = config )
+            logging.info(agentresponse)
+
+            if agentresponse.status_code == 200:
+                # Copy body of response into config:
+                config = {}
+                # If input body data, then update properties
+                if request.data:
+                    request_data = json.loads(request.data)
+                    # Update the keys of payload in json file.
+                    for key, value in request_data.items():
+                        config[key] = value
+
+                # Set odata.id and Id to properties for this instance:
+                config['@odata.id'] = create_agent_path ("/redfish/v1/", self.fabrics, fabric, self.f_connections, f_connection)
+                config['Id'] = f_connection
+
+                config = create_and_patch_agent_object (config, members, member_ids, path, collection_path)
+                # Create sub-collections:
+                resp = config, 200
+            else:
+                resp = 404
+                return resp
 
         except Exception:
             traceback.print_exc()
