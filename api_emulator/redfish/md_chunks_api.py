@@ -41,7 +41,7 @@ import urllib3
 
 from flask import jsonify, request
 from flask_restful import Resource
-from api_emulator.utils import update_collections_json, create_path, get_json_data, create_and_patch_object, delete_object, patch_object, put_object, delete_collection, create_collection, create_agent_path, add_input_body_properties, create_and_patch_agent_object
+from api_emulator.utils import update_collections_json, create_path, get_json_data, create_and_patch_object, delete_object, patch_object, put_object, delete_collection, create_collection, create_agent_path, create_and_patch_agent_object
 from .constants import *
 from .templates.md_chunks import get_MDChunks_instance
 
@@ -87,8 +87,6 @@ class MDChunksAPI(Resource):
 
             wildcards = {'c_id':chassis, 'md_id': memory_domain, 'mc_id': md_chunks, 'rb': g.rest_base}
             config=get_MDChunks_instance(wildcards)
-
-            config = add_input_body_properties (config)
 
             # Send commands to Agent:
             agentpath = create_agent_path (g.AGENT, "/redfish/v1/", self.chassis, chassis, self.memory_domains, memory_domain, self.md_chunks, md_chunks)

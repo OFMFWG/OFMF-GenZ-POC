@@ -338,6 +338,7 @@ def create_and_patch_agent_object (config, members, member_ids, path, collection
     members.append(config)
     member_ids.append({'@odata.id': config['@odata.id']})
 
+    config = add_input_body_properties (config)
     # Create instances of subordinate resources, then call put operation
     # not implemented yet
     if not os.path.exists(path):
