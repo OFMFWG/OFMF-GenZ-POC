@@ -76,7 +76,7 @@ class FabricsConnectionsAPI(Resource):
         if not os.path.exists(collection_path):
             FabricsConnectionsCollectionAPI.post (self, fabric)
 
-        if f_connection in members:
+        if os.path.exists (path):
             resp = 404
             return resp
         try:
@@ -102,11 +102,57 @@ class FabricsConnectionsAPI(Resource):
                         config[key] = value
 
                 # Set odata.id and Id to properties for this instance:
-                config['@odata.id'] = create_agent_path ("/redfish/v1/", self.fabrics, fabric, self.f_connections, f_connection)
+                config['@odata.id'] = create_agent_path ("\/", "/redfish/v1/", self.fabrics, fabric, self.f_connections, f_connection)
                 config['Id'] = f_connection
 
                 config = create_and_patch_agent_object (config, members, member_ids, path, collection_path)
-                # Create sub-collections:
+
+                # Create Links.Connections in Endpoints (Links.InitiatorEndpoints, Links.TargetEndpoints)
+
+                if 'Links' in config:
+                    if 'InitiatorEndpoints' in config['Links']:
+                        for ep in config['Links']['InitiatorEndpoints']:
+                            # Get endpoint identifier:
+                            data = {}
+                            endpointPath = ep['@odata.id']
+                            epPath = endpointPath.replace ("/redfish/v1/", "Resources/")
+                            epPath = create_path(epPath, "index.json")
+                            # Create property to patch to endpoint:
+                            connectionID = {}
+                            connectionID['Links'] = {"Connections": [{ "@odata.id": config.get('@odata.id') }]}
+                            # Write additional properties to Endpoint
+                            with open(epPath, "r") as data_json:
+                                data = json.load(data_json)
+                            # Update the keys of payload in json file.
+                            data['Links']['Connections'].extend (connectionID['Links']['Connections'])
+                            # Write the updated json to file.
+                            with open(epPath, 'w') as f:
+                                json.dump(data, f, indent=4, sort_keys=True)
+                                f.close()
+
+                       # Repeat for TargetEndpoints
+                    if 'TargetEndpoints' in config['Links']:
+                        for ep in config['Links']['TargetEndpoints']:
+                            data = {}
+                            # Get endpoint identifier:
+                            endpointPath = ep['@odata.id']
+                            epPath = endpointPath.replace ("/redfish/v1/", "Resources/")
+                            epPath = create_path(epPath, "index.json")
+                            # Create property to patch to endpoint:
+                            connectionID = {}
+                            connectionID['Links'] = {"Connections": [{ "@odata.id": config.get('@odata.id') }]}
+                            # Write additional properties to Endpoint
+                            with open(epPath, "r") as data_json:
+                                data = json.load(data_json)
+                            # Update the keys of payload in json file.
+                            data['Links']['Connections'].extend (connectionID['Links']['Connections'])
+                            # Write the updated json to file.
+                            with open(epPath, 'w') as f:
+                                json.dump(data, f, indent=4, sort_keys=True)
+                                f.close()
+
+
+
                 resp = config, 200
             else:
                 resp = 404

@@ -351,3 +351,27 @@ def create_and_patch_agent_object (config, members, member_ids, path, collection
     # update the collection json file with new added resource
     update_collections_json(path=collection_path, link=config['@odata.id'])
     return config
+
+def patch_agent_object(path, config):
+    try:
+    # Read json from file.
+        with open(path, 'r') as data_json:
+            data = json.load(data_json)
+            data_json.close()
+
+        # If input body data, then update properties
+        if config:
+            request_data = json.loads(config)
+            # Update the keys of payload in json file.
+            for key, value in request_data.items():
+                data[key] = value
+
+        # Write the updated json to file.
+        with open(path, 'w') as f:
+            json.dump(data, f)
+            f.close()
+
+    except Exception as e:
+        return {"error": "Unable to read file because of the following error:{}".format(e)}, 404
+
+    return True
