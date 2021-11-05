@@ -143,6 +143,8 @@ echo "Add mockups from OFMF mockup repository..."
 rm -rf $WORK_DIR/Resources
 cp -r -f $MOCKUP_DIR/SC21-PoC/ $WORK_DIR/Resources
 cp -r -f $MOCKUP_DIR/SC21-PoC/ $WORK_DIR/api_emulator/redfish/static
+# and add empty service root
+cp -r -f $BASE_DIR/templates/ $WORK_DIR/templates
 
 if [ "$SETUP_ONLY" == "true" ]; then
     echo ""

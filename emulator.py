@@ -386,6 +386,21 @@ def reset():
     return resp
 
 
+# If DELETE /redfish/v1/resetclear, then delete all Resources and replace with "empty" mockup
+#
+@g.app.route('/redfish/v1/resetclear/', methods=['DELETE'])
+def resetclear():
+    try:
+        if os.path.exists('Resources'):
+            shutil.rmtree('Resources')
+
+        shutil.copytree('templates/emptyserviceroot', 'Resources')
+        resp = error_response('Emulator reset.', 204, True)
+    except Exception:
+        traceback.print_exc()
+        resp = error_response('Internal Server Error', 500, True)
+    return resp
+
 #
 # If GET /, then return index.html (an intro page)
 #
