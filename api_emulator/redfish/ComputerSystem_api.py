@@ -60,8 +60,9 @@ from .ResourceBlock_api import members as resource_blocks
 from .constants import *
 from api_emulator.utils import update_collections_json, create_path, get_json_data, create_and_patch_object, delete_object, patch_object, put_object, delete_collection, create_collection
 
-members = {}
-
+members = []
+member_ids = []
+wildcards = {}
 INTERNAL_ERROR = 500
 
 
@@ -80,6 +81,8 @@ class ComputerSystemAPI(Resource):
         logging.info('ComputerSystemAPI init called')
         self.root = PATHS['Root']
         self.systems = PATHS['Systems']['path']
+        print(self.root)
+        print(self.systems)
 
     def memory_summary(self,ident):
         totalsysmem=sum([x['CapacityMiB']for x in
@@ -116,17 +119,22 @@ class ComputerSystemAPI(Resource):
     # PATCH commands can then be used to update the new instance.
     def post(self, ident):
         logging.info('ComputerSystemAPI POST called')
-        path = os.path.join(self.root, self.systems, ident, 'index.json')
+        #path = os.path.join(self.root, self.systems, ident, 'index.json')
+        path = os.path.join(self.root, self.systems, ident)
+        print("path ",path)
         collection_path = os.path.join(self.root, self.systems, 'index.json')
+        print(collection_path)
         if ident in members:
             resp = 404
             return resp
         try:
             global config
             global wildcards
-            wildcards['id'] = ident
-            wildcards['linkMgr'] = 'UpdateWithPATCH'
-            wildcards['linkChassis'] = ['UpdateWithPATCH']
+            wildcards['s_id'] = ident
+            wildcards['rb'] = g.rest_base  #rwh
+            #wildcards['linkMgr'] = 'UpdateWithPATCH'
+            #wildcards['linkChassis'] = ['UpdateWithPATCH']
+            print(wildcards)
             config=get_ComputerSystem_instance(wildcards)
 
             config = create_and_patch_object (config, members, member_ids, path, collection_path)
@@ -182,9 +190,19 @@ class ComputerSystemCollectionAPI(Resource):
 
     # HTTP POST
     # POST should allow adding multiple instances to a collection.
+
+    # HTTP POST Collection
+    def post(self):
+        self.root = PATHS['Root']
+        self.systems = PATHS['Systems']['path']
+
+        path = create_path(self.root, self.systems)
+        return create_collection (path, 'Systems')
+
     # For now, this only adds one instance.
     # TODO: 'id' should be obtained from the request data.
     # TODO: May need an update for composed systems.
+    '''
     def post(self):
         logging.info('ComputerSystemCollectionAPI POST called')
         try:
@@ -199,8 +217,9 @@ class ComputerSystemCollectionAPI(Resource):
             traceback.print_exc()
             resp = INTERNAL_ERROR
         return resp
+    '''
 
-        '''
+    '''
         resp = INTERNAL_ERROR
         req = request.get_json()
 
@@ -211,7 +230,7 @@ class ComputerSystemCollectionAPI(Resource):
             resp = INTERNAL_ERROR
 
         return resp
-        '''
+    '''
 
     # HTTP PATCH
     def patch(self):
