@@ -87,8 +87,10 @@ class FabricsConnectionsAPI(Resource):
 
             # Send commands to Agent:
             agentpath = create_agent_path (g.AGENT, "/redfish/v1/", self.fabrics, fabric, self.f_connections, f_connection)
+            headers = {'Content-type':'application/json', 'Accept':'text/plain'}
+
             logging.info(agentpath)
-            agentresponse = requests.post(agentpath, data = config )
+            agentresponse = requests.post(agentpath, data = json.dumps(config), headers = headers )
             logging.info(agentresponse)
 
             if agentresponse.status_code == 200:

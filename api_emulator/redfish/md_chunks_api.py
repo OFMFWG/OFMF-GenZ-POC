@@ -89,11 +89,13 @@ class MDChunksAPI(Resource):
             config=get_MDChunks_instance(wildcards)
 
             config = add_input_body_properties (config)
+            print("new chunk config ",json.dumps(config, indent=4))
 
             # Send commands to Agent:
             agentpath = create_agent_path (g.AGENT, "/redfish/v1/", self.chassis, chassis, self.memory_domains, memory_domain, self.md_chunks, md_chunks)
             logging.info(agentpath)
-            agentresponse = requests.post(agentpath, data = config )
+            headers = {'Content-type':'application/json', 'Accept':'text/plain'}
+            agentresponse = requests.post(agentpath, data = json.dumps(config), headers = headers)
             logging.info(agentresponse)
 
             if agentresponse.status_code == 200:
