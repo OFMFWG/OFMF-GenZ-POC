@@ -138,6 +138,19 @@ class MDChunksAPI(Resource):
         #Set path to object, then call delete_object:
         path = create_path(self.root, self.chassis, chassis, self.memory_domains, memory_domain, self.md_chunks, md_chunks)
         base_path = create_path(self.root, self.chassis, chassis, self.memory_domains, memory_domain, self.md_chunks)
+
+        # Send commands to Agent:
+        agentpath = create_agent_path (g.AGENT, "/redfish/v1/", self.chassis, chassis, self.memory_domains, memory_domain, self.md_chunks, md_chunks)
+        logging.info(agentpath)
+        agentresponse = requests.delete(agentpath, data = config )
+        logging.info(agentresponse)
+
+        if agentresponse.status_code == 200:
+            resp = config, 200
+        else:
+            resp = 404
+            return resp
+        
         return delete_object(path, base_path)
 
 
