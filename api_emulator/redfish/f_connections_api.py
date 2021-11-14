@@ -183,6 +183,79 @@ class FabricsConnectionsAPI(Resource):
         #Set path to object, then call delete_object:
         path = create_path(self.root, self.fabrics, fabric, self.f_connections, f_connection)
         base_path = create_path(self.root, self.fabrics, fabric, self.f_connections)
+
+        # Call agent.delete, remove connections from endpoint, 
+        # delete local get_Connections_instance
+        try:
+
+            # Send commands to Agent:
+            agentpath = create_agent_path (g.AGENT, "/redfish/v1/", self.fabrics, \
+                    fabric, self.f_connections, f_connection)
+            logging.info(agentpath)
+            agentresponse = requests.delete(agentpath, data = config )
+            logging.info(agentresponse)
+
+            if agentresponse.status_code == 200:
+
+                # Delete Create Links.Connections in Endpoints 
+                # (Links.InitiatorEndpoints, Links.TargetEndpoints)
+
+                if 'Links' in config:
+                    if 'InitiatorEndpoints' in config['Links']:
+                        for ep in config['Links']['InitiatorEndpoints']:
+                            # Get endpoint identifier:
+                            data = {}
+                            endpointPath = ep['@odata.id']
+                            epPath = endpointPath.replace ("/redfish/v1/", "Resources/")
+                            epPath = create_path(epPath, "index.json")
+                            # Create property to patch to endpoint:
+                            connectionID = {}
+                            connectionID['Links'] = {"Connections": \
+                                    [{ "@odata.id": config.get('@odata.id') }]}
+                            # Delete additional properties to Endpoint
+                            with open(epPath, "r") as data_json:
+                                data = json.load(data_json)
+
+                            if connectionID['Links']['Connections'][0] in \
+                                    data['Links']['Connections']:
+                                data['Links']['Connections'].remove \
+                                        (connectionID['Links']['Connections'][0])
+
+                            # Write the updated json to file.
+                            with open(epPath, 'w') as f:
+                                json.dump(data, f, indent=4, sort_keys=True)
+                                f.close()
+
+                       # Repeat for TargetEndpoints
+                    if 'TargetEndpoints' in config['Links']:
+                        for ep in config['Links']['TargetEndpoints']:
+                            data = {}
+                            # Get endpoint identifier:
+                            endpointPath = ep['@odata.id']
+                            epPath = endpointPath.replace ("/redfish/v1/", "Resources/")
+                            epPath = create_path(epPath, "index.json")
+                            # Create property to patch to endpoint:
+                            connectionID = {}
+                            connectionID['Links'] = {"Connections": \
+                                    [{ "@odata.id": config.get('@odata.id') }]}
+                            # Delete additional properties to Endpoint
+                            with open(epPath, "r") as data_json:
+                                data = json.load(data_json)
+
+                            if connectionID['Links']['Connections'][0] in \
+                                    data['Links']['Connections']:
+                                data['Links']['Connections'].remove \
+                                        (connectionID['Links']['Connections'][0])
+
+                            # Write the updated json to file.
+                            with open(epPath, 'w') as f:
+                                json.dump(data, f, indent=4, sort_keys=True)
+                                f.close()
+
+
+        except:
+            return (config, 404)
+
         return delete_object(path, base_path)
 
 # Fabrics Connections Collection API
