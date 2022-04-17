@@ -108,7 +108,7 @@ class MDChunksAPI(Resource):
                         config[key] = value
 
                 # Set odata.id and Id to properties for this instance:
-                config['@odata.id'] = create_agent_path ("/redfish/v1/", self.chassis, chassis, self.memory_domains,  memory_domain, self.md_chunks, md_chunks)
+                config['@odata.id'] = "/" + create_agent_path ("/redfish/v1/", self.chassis, chassis, self.memory_domains,  memory_domain, self.md_chunks, md_chunks)
                 config['Id'] = md_chunks
 
                 config = create_and_patch_agent_object (config, members, member_ids, path, collection_path)
