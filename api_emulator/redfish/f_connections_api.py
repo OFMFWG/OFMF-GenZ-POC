@@ -32,6 +32,7 @@
 import json, os
 import shutil
 import requests
+import copy
 
 import traceback
 import logging
@@ -91,12 +92,17 @@ class FabricsConnectionsAPI(Resource):
 
             logging.info(agentpath)
             agentresponse = requests.post(agentpath, data = json.dumps(config), headers = headers )
+            print("return from agent .... ")
+            print(json.dumps(agentresponse.json(), indent =4 ))
             logging.info(agentresponse)
 
             if agentresponse.status_code == 200:
                 # Copy body of response into config:
                 config = {}
                 # If input body data, then update properties
+                # ... seems out of place here.... want to use agent return,
+                # .... not original request data
+                '''
                 if request.data:
                     request_data = json.loads(request.data)
                     # Update the keys of payload in json file.
@@ -104,9 +110,11 @@ class FabricsConnectionsAPI(Resource):
                         config[key] = value
 
                 # Set odata.id and Id to properties for this instance:
-                config['@odata.id'] = create_agent_path ("\/", "/redfish/v1/", self.fabrics, fabric, self.f_connections, f_connection)
+                config['@odata.id'] = "/"+create_agent_path ( "/redfish/v1/", self.fabrics, fabric, self.f_connections, f_connection)
                 config['Id'] = f_connection
+                '''
 
+                config=copy.deepcopy(agentresponse.json())
                 config = create_and_patch_agent_object (config, members, member_ids, path, collection_path)
 
                 # Create Links.Connections in Endpoints (Links.InitiatorEndpoints, Links.TargetEndpoints)
@@ -193,6 +201,8 @@ class FabricsConnectionsAPI(Resource):
                     fabric, self.f_connections, f_connection)
             logging.info(agentpath)
             agentresponse = requests.delete(agentpath, data = config )
+            print("return from agent .... ")
+            print(json.dumps(agentresponse.json(), indent =4 ))
             logging.info(agentresponse)
 
             if agentresponse.status_code == 200:

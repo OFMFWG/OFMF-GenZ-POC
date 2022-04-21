@@ -35,6 +35,7 @@ import traceback
 import logging
 import shutil
 import requests
+import copy
 
 import g
 import urllib3
@@ -95,12 +96,17 @@ class MDChunksAPI(Resource):
             logging.info(agentpath)
             headers = {'Content-type':'application/json', 'Accept':'text/plain'}
             agentresponse = requests.post(agentpath, data = json.dumps(config), headers = headers)
+            print("return from agent .... ")
+            print(json.dumps(agentresponse.json(), indent =4 ))
             logging.info(agentresponse)
 
             if agentresponse.status_code == 200:
                 # Copy body of response into config:
                 config = {}
                 # If input body data, then update properties
+                # ... seems out of place here.... want to use agent return,
+                # .... not original request data
+                '''
                 if request.data:
                     request_data = json.loads(request.data)
                     # Update the keys of payload in json file.
@@ -110,7 +116,9 @@ class MDChunksAPI(Resource):
                 # Set odata.id and Id to properties for this instance:
                 config['@odata.id'] = "/" + create_agent_path ("/redfish/v1/", self.chassis, chassis, self.memory_domains,  memory_domain, self.md_chunks, md_chunks)
                 config['Id'] = md_chunks
+                '''
 
+                config=copy.deepcopy(agentresponse.json())
                 config = create_and_patch_agent_object (config, members, member_ids, path, collection_path)
                 # Create sub-collections:
                 resp = config, 200
@@ -147,6 +155,8 @@ class MDChunksAPI(Resource):
                 chassis, self.memory_domains, memory_domain, self.md_chunks, md_chunks)
         logging.info(agentpath)
         agentresponse = requests.delete(agentpath, data = config )
+        print("return from agent .... ")
+        print(json.dumps(agentresponse.json(), indent =4 ))
         logging.info(agentresponse)
 
         if agentresponse.status_code == 200:
