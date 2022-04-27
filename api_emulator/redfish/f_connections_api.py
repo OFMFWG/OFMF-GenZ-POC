@@ -72,12 +72,15 @@ class FabricsConnectionsAPI(Resource):
         logging.info('FabricsConnectionsAPI POST called')
         path = create_path(self.root, self.fabrics, fabric, self.f_connections, f_connection)
         collection_path = os.path.join(self.root, self.fabrics, fabric, self.f_connections, 'index.json')
+        print("OFMF incoming request path------------")
+        print(path)
 
         # Check if collection exists:
         if not os.path.exists(collection_path):
             FabricsConnectionsCollectionAPI.post (self, fabric)
 
         if os.path.exists (path):
+            print("OFMF path already posted")
             resp = 404
             return resp
         try:
@@ -89,6 +92,8 @@ class FabricsConnectionsAPI(Resource):
             # Send commands to Agent:
             agentpath = create_agent_path (g.AGENT, "/redfish/v1/", self.fabrics, fabric, self.f_connections, f_connection)
             headers = {'Content-type':'application/json', 'Accept':'text/plain'}
+            print("config sent to agent")
+            print(json.dumps(config, indent = 4))
 
             logging.info(agentpath)
             agentresponse = requests.post(agentpath, data = json.dumps(config), headers = headers )
@@ -115,6 +120,8 @@ class FabricsConnectionsAPI(Resource):
                 '''
 
                 config=copy.deepcopy(agentresponse.json())
+                print("OFMF config sent to Resources")
+                print(config)
                 config = create_and_patch_agent_object (config, members, member_ids, path, collection_path)
 
                 # Create Links.Connections in Endpoints (Links.InitiatorEndpoints, Links.TargetEndpoints)
@@ -191,16 +198,35 @@ class FabricsConnectionsAPI(Resource):
         #Set path to object, then call delete_object:
         path = create_path(self.root, self.fabrics, fabric, self.f_connections, f_connection)
         base_path = create_path(self.root, self.fabrics, fabric, self.f_connections)
+        print("OFMF DELETE incoming request path------------")
+        print(path)
 
         # Call agent.delete, remove connections from endpoint, 
         # delete local get_Connections_instance
         try:
 
+            # If input body data, then update properties
+            if request.data:
+                request_data = json.loads(request.data)
+                # Update the keys of payload in json file.
+                #for key, value in request_data.items():
+                    #config[key] = value
+
+                #config['@odata.id'] = odata_id
+                #config['Id'] = object_id
+                config = copy.deepcopy(request_data)
+                print(json.dumps(config, indent = 4))
+            else:
+                print("Could not locate body of DELETE request")
+
             # Send commands to Agent:
+            print("config sent to agent")
+            print(json.dumps(config, indent = 4))
             agentpath = create_agent_path (g.AGENT, "/redfish/v1/", self.fabrics, \
                     fabric, self.f_connections, f_connection)
             logging.info(agentpath)
-            agentresponse = requests.delete(agentpath, data = config )
+            headers = {'Content-type':'application/json', 'Accept':'text/plain'}
+            agentresponse = requests.delete(agentpath, data =json.dumps( config, indent =4 ), headers=headers)
             print("return from agent .... ")
             print(json.dumps(agentresponse.json(), indent =4 ))
             logging.info(agentresponse)

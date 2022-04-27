@@ -154,7 +154,20 @@ class MDChunksAPI(Resource):
         agentpath = create_agent_path (g.AGENT, "/redfish/v1/", self.chassis, \
                 chassis, self.memory_domains, memory_domain, self.md_chunks, md_chunks)
         logging.info(agentpath)
-        agentresponse = requests.delete(agentpath, data = config )
+        if request.data:
+            request_data = json.loads(request.data)
+            # Update the keys of payload in json file.
+            #for key, value in request_data.items():
+                #config[key] = value
+                #config['@odata.id'] = odata_id
+                #config['Id'] = object_id
+            config = copy.deepcopy(request_data)
+            print(json.dumps(config, indent=4))
+        else:
+            print("Could not locate body of DELETE request")
+
+        headers = {'Content-type':'application/json', 'Accept':'text/plain'}
+        agentresponse = requests.delete(agentpath, data =json.dumps( config, indent =4 ), headers=headers)
         print("return from agent .... ")
         print(json.dumps(agentresponse.json(), indent =4 ))
         logging.info(agentresponse)
